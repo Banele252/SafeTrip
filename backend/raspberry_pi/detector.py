@@ -84,6 +84,7 @@ def detect(net, frame, confidence_threshold):
             "confidence": round(confidence, 3),
             "position": position_of(x_center),
             "proximity": proximity_of(area_ratio),
+            "box": (int(x1), int(y1), int(x2), int(y2)),
         })
     return objects
 
@@ -133,13 +134,28 @@ def describe(objects):
     return ", ".join(parts)
 
 
+def save_snapshot(frame, objects, snapshot_path):
+    """Save the frame with boxes drawn on it. Written to a temp file first so readers never see a partial image."""
+    annotated = frame.copy()
+    for obj in objects:
+        x1, y1, x2, y2 = obj["box"]
+        cv2.rectangle(annotated, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.putText(annotated, obj["label"], (x1, max(y1 - 6, 12)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+
+    temp_path = snapshot_path + ".tmp.jpg"
+    cv2.imwrite(temp_path, annotated)
+    os.replace(temp_path, snapshot_path)
+
+
 def build_record(device_id, objects, description):
+    # Boxes are only for the snapshot, so leave them out of what goes to the API.
+    api_objects = [{key: value for key, value in obj.items() if key != "box"} for obj in objects]
     return {
         "id": str(uuid.uuid4()),
         "device_id": device_id,
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "description": description,
-        "objects": objects,
+        "objects": api_objects,
     }
 
 
@@ -158,6 +174,8 @@ def run_cycle(net, cam, args, last_description):
     description = describe(objects)
     print(description)
 
+    save_snapshot(frame, objects, args.snapshot)
+
     # Only record when the scene changed, so the uploader doesn't resend the same thing.
     if description != last_description:
         append_to_outbox(args.outbox, build_record(args.device_id, objects, description))
@@ -171,6 +189,8 @@ def parse_args():
     parser.add_argument("--model-dir", default=os.getenv("MODEL_DIR", "models"),
                         help="folder with MobileNetSSD_deploy.prototxt and .caffemodel")
     parser.add_argument("--outbox", default=os.getenv("OUTBOX_PATH", "outbox.jsonl"))
+    parser.add_argument("--snapshot", default=os.getenv("SNAPSHOT_PATH", "latest.jpg"),
+                        help="where to save the latest annotated frame for the dashboard")
     parser.add_argument("--device-id", default=os.getenv("DEVICE_ID", "raspberry-pi-1"))
     parser.add_argument("--interval", type=float, default=float(os.getenv("DETECT_INTERVAL", "2")),
                         help="seconds between detection cycles")

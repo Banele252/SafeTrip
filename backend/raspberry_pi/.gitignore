@@ -1,3 +1,8 @@
 models/
 outbox.jsonl
 outbox.offset
+uploader_status.json
+uploader_status.json.tmp
+latest.jpg
+latest.jpg.tmp.jpg
+.env

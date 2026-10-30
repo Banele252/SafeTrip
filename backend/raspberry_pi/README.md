@@ -41,6 +41,47 @@ Useful flags:
 - `--dry-run` on `uploader.py` prints payloads without sending.
 - `--interval` sets seconds between detection cycles (detector) or outbox passes (uploader).
 
+## Dashboard
+
+`dashboard.py` is a read-only web page served from the Pi. It shows the latest annotated snapshot, the current description, pending and sent counts, the location, the API host and any upload error, plus a log of recent detections marked sent or pending.
+
+```bash
+export DASHBOARD_TOKEN=pick-a-long-random-string   # strongly recommended
+python dashboard.py
+```
+
+Open `http://raspberrypi.local:8080/?token=pick-a-long-random-string` from any device on the same network. Without `DASHBOARD_TOKEN`, anyone on the network can see the camera snapshot.
+
+The dashboard only reads files: `latest.jpg` (written by `detector.py`), `outbox.jsonl` and `outbox.offset` (written by the detector and uploader), and `uploader_status.json` (written by `uploader.py` after each pass). It never opens the camera.
+
+Environment variables:
+
+- `DASHBOARD_HOST` and `DASHBOARD_PORT` (default `0.0.0.0` and `8080`)
+- `STATUS_PATH` and `SNAPSHOT_PATH` if the files are not in the working directory
+- `FRONTEND_DIR` if the frontend is not at `../../frontend`
+
+## Running as services
+
+Example systemd unit for the detector (repeat for `uploader.py` and `dashboard.py`):
+
+```ini
+# /etc/systemd/system/safetrip-detector.service
+[Unit]
+Description=SafeTrip scene detector
+After=network-online.target
+
+[Service]
+WorkingDirectory=/home/pi/SafeTrip/backend/raspberry_pi
+EnvironmentFile=/home/pi/SafeTrip/backend/raspberry_pi/.env
+ExecStart=/home/pi/SafeTrip/backend/raspberry_pi/.venv/bin/python detector.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Then `sudo systemctl enable --now safetrip-detector`. Keep API keys and tokens in the `.env` file, not in the unit.
+
 ## Location
 
 `uploader.py` tries these in order and attaches the first one it finds:
