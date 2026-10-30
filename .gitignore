@@ -1,0 +1,26 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Editor state (VS Code ROS2 browse database is ~1 GB and machine-specific)
+.vscode/
+
+# Secrets and local configuration
+.env
+
+# Terraform state (may contain sensitive values)
+*.tfstate
+*.tfstate.*
+
+# Runtime output from the Raspberry Pi scripts
+latest.jpg
+outbox.jsonl
+outbox.offset
+uploader_status.json
