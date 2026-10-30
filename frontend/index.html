@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SafeTrip Pi</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>SafeTrip</h1>
+    <span id="badge" class="badge">Connecting…</span>
+  </header>
+
+  <main>
+    <section class="card">
+      <img id="snapshot" alt="Latest camera snapshot" hidden>
+      <p id="snapshot-empty" class="muted">No snapshot yet</p>
+    </section>
+
+    <section class="card">
+      <h2>What the camera sees</h2>
+      <p id="description" class="description">—</p>
+      <p id="description-time" class="muted"></p>
+    </section>
+
+    <section class="stats">
+      <div class="card stat">
+        <span class="label">Pending</span>
+        <span id="pending" class="value">—</span>
+      </div>
+      <div class="card stat">
+        <span class="label">Sent total</span>
+        <span id="sent-total" class="value">—</span>
+      </div>
+      <div class="card stat">
+        <span class="label">Last success</span>
+        <span id="last-success" class="value small">—</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Location and API</h2>
+      <p id="location">Unknown</p>
+      <p id="api-host" class="muted"></p>
+      <p id="last-error" class="error" hidden></p>
+    </section>
+
+    <section class="card">
+      <h2>Recent detections</h2>
+      <ul id="log" class="log"></ul>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
