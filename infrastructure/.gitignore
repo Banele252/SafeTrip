@@ -1,0 +1,10 @@
+# Local Terraform working files
+.terraform/
+crash.log
+
+# State can contain sensitive values; never commit it
+*.tfstate
+*.tfstate.*
+
+# Variable files may hold secrets
+*.tfvars
